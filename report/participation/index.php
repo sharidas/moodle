@@ -27,6 +27,7 @@ require('../../config.php');
 require_once($CFG->dirroot.'/lib/tablelib.php');
 require_once($CFG->dirroot.'/notes/lib.php');
 require_once($CFG->dirroot.'/report/participation/locallib.php');
+require_once($CFG->libdir . '/reportslib.php');
 
 define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
@@ -69,6 +70,12 @@ require_login($course);
 $context = context_course::instance($course->id);
 require_capability('report/participation:view', $context);
 
+// Last selected report.
+if (!isset($USER->course_last_report)) {
+    $USER->course_last_report = [];
+}
+$USER->course_last_report[$id] = $url;
+
 $strparticipation = get_string('participationreport');
 $strviews         = get_string('views');
 $strposts         = get_string('posts');
@@ -82,6 +89,10 @@ if (!array_key_exists($action, $actionoptions)) {
 $PAGE->set_title(format_string($course->shortname, true, array('context' => $context)) .': '. $strparticipation);
 $PAGE->set_heading(format_string($course->fullname, true, array('context' => $context)));
 echo $OUTPUT->header();
+
+// Print the selector dropdown.
+$pluginname = get_string('pluginname', 'report_participation');
+print_report_selector($pluginname);
 
 // Logs will not have been recorded before the course timecreated time.
 $minlog = $course->timecreated;

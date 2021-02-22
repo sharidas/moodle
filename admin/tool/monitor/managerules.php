@@ -24,6 +24,7 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/reportslib.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $ruleid = optional_param('ruleid', 0, PARAM_INT);
@@ -109,6 +110,16 @@ if (!empty($action) && $ruleid) {
     }
 } else {
     echo $OUTPUT->header();
+
+    // Last selected report.
+    if (!isset($USER->course_last_report)) {
+        $USER->course_last_report = [];
+    }
+    $USER->course_last_report[$courseid] = $manageurl;
+
+    // Print the selected dropdown.
+    $managerules = get_string('managerules', 'tool_monitor');
+    print_report_selector($managerules);
 }
 
 echo $OUTPUT->heading(get_string('managerules', 'tool_monitor'));
