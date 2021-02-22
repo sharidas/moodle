@@ -1,0 +1,58 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+ /**
+  * Code to print header with a dropdown
+  *
+  * @package core
+  * @subpackage report
+  * @copyright 2021 Sujith Haridasan
+  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+  */
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Print the selector dropdown
+ *
+ * @param string $pluginname The report plugin where the header is modified
+ * @return void
+ */
+function print_report_selector($pluginname) {
+    global $CFG, $OUTPUT, $PAGE;
+
+    if ($reportnode = $PAGE->settingsnav->find('coursereports', \navigation_node::TYPE_CONTAINER)) {
+        if ($children = $reportnode->children) {
+            // Menu to select report pages to navigate.
+            $activeurl = '';
+            foreach ($children as $key => $node) {
+                $name = $node->text;
+
+                $url = $node->action()->out(false);
+                $menu[$url] = $name;
+                if ($name === $pluginname) {
+                    $activeurl = $url;
+                }
+            }
+        }
+
+        if (!empty($menu)) {
+            $select = new url_select($menu, $activeurl, null, 'choosecoursereport');
+            $select->set_label(get_string('reports'), ['class' => 'accesshide']);
+            echo $OUTPUT->render($select);
+        }
+    }
+}

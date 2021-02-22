@@ -25,6 +25,7 @@
 
 require('../../config.php');
 require_once($CFG->libdir . '/completionlib.php');
+require_once($CFG->libdir . '/reportslib.php');
 
 define('COMPLETION_REPORT_PAGE', 25);
 
@@ -142,6 +143,12 @@ $grandtotal = $completion->get_num_tracked_users('', array(), $group);
 // Get user data
 $progress = array();
 
+// Last selected report.
+if (!isset($USER->course_last_report)) {
+    $USER->course_last_report = [];
+}
+$USER->course_last_report[$id] = $url;
+
 if ($total) {
     $progress = $completion->get_progress_all(
         implode(' AND ', $where),
@@ -179,6 +186,10 @@ if ($csv && $grandtotal && count($activities)>0) { // Only show CSV if there are
     $PAGE->set_title($strcompletion);
     $PAGE->set_heading($course->fullname);
     echo $OUTPUT->header();
+
+    // Print the selected dropdown.
+    $pluginname = get_string('pluginname', 'report_progress');
+    print_report_selector($pluginname);
     $PAGE->requires->js_call_amd('report_progress/completion_override', 'init', [fullname($USER)]);
 
     // Handle groups (if enabled)

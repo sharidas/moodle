@@ -27,6 +27,7 @@ require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/report/log/locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/lib/tablelib.php');
+require_once($CFG->libdir . '/reportslib.php');
 
 $id          = optional_param('id', 0, PARAM_INT);// Course ID.
 $group       = optional_param('group', 0, PARAM_INT); // Group to display.
@@ -102,6 +103,12 @@ $url = new moodle_url("/report/log/index.php", $params);
 
 $PAGE->set_url('/report/log/index.php', array('id' => $id));
 $PAGE->set_pagelayout('report');
+
+// Last selected report.
+if (!isset($USER->course_last_report)) {
+    $USER->course_last_report = [];
+}
+$USER->course_last_report[$id] = $url;
 
 // Get course details.
 $course = null;
@@ -184,6 +191,9 @@ if (empty($readers)) {
         }
     } else {
         echo $output->header();
+        // Print selector dropdown.
+        $pluginname = get_string('pluginname', 'report_log');
+        print_report_selector($pluginname);
         echo $output->heading(get_string('chooselogs') .':');
         echo $output->render($reportlog);
     }

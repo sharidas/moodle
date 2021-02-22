@@ -26,6 +26,7 @@
 require_once('../../config.php');
 require_once($CFG->dirroot.'/report/stats/locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/reportslib.php');
 
 $courseid = optional_param('course', SITEID, PARAM_INT);
 $report   = optional_param('report', 0, PARAM_INT);
@@ -74,6 +75,13 @@ $event = \report_stats\event\report_viewed::create(array('context' => $context, 
 $event->trigger();
 stats_check_uptodate($course->id);
 
+// Last selected report.
+$url = new moodle_url('/report/stats/index.php', ['course' => $course->id]);
+if (!isset($USER->course_last_report)) {
+    $USER->course_last_report = [];
+}
+$USER->course_last_report[$courseid] = $url;
+
 if ($course->id == SITEID) {
     admin_externalpage_setup('reportstats', '', null, '', array('pagelayout'=>'report'));
     echo $OUTPUT->header();
@@ -86,6 +94,10 @@ if ($course->id == SITEID) {
     $PAGE->set_pagelayout('report');
     $PAGE->set_headingmenu(report_stats_mode_menu($course, $mode, $time, "$CFG->wwwroot/report/stats/index.php"));
     echo $OUTPUT->header();
+
+    // Print the selected dropdown.
+    $pluginname = get_string('pluginname', 'report_stats');
+    print_report_selector($pluginname);
 }
 
 report_stats_report($course, $report, $mode, $user, $roleid, $time);

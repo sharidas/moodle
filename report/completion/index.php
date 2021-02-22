@@ -26,6 +26,7 @@
 
 require_once(__DIR__.'/../../config.php');
 require_once("{$CFG->libdir}/completionlib.php");
+require_once($CFG->libdir . '/reportslib.php');
 
 /**
  * Configuration
@@ -112,6 +113,12 @@ foreach ($completion->get_criteria() as $criterion) {
     }
 }
 
+// Last selected report.
+if (!isset($USER->course_last_report)) {
+    $USER->course_last_report = [];
+}
+$USER->course_last_report[$courseid] = $url;
+
 // Can logged in user mark users as complete?
 // (if the logged in user has a role defined in the role criteria)
 $allow_marking = false;
@@ -155,6 +162,9 @@ if ($csv) {
     $PAGE->set_heading($course->fullname);
 
     echo $OUTPUT->header();
+    // Print the selected dropdown.
+    $pluginname = get_string('pluginname', 'report_completion');
+    print_report_selector($pluginname);
 
     // Handle groups (if enabled)
     groups_print_course_menu($course, $CFG->wwwroot.'/report/completion/index.php?course='.$course->id);

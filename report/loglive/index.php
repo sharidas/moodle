@@ -27,6 +27,7 @@
 require('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->libdir . '/reportslib.php');
 
 $id = optional_param('id', 0, PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
@@ -59,6 +60,12 @@ $url = new moodle_url("/report/loglive/index.php", $params);
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('report');
 
+// Last selected report.
+if (!isset($USER->course_last_report)) {
+    $USER->course_last_report = [];
+}
+$USER->course_last_report[$id] = $url;
+
 $renderable = new report_loglive_renderable($logreader, $id, $url, 0, $page);
 $refresh = $renderable->get_refresh_rate();
 $logreader = $renderable->selectedlogreader;
@@ -83,6 +90,10 @@ $PAGE->set_heading("$coursename: $strlivelogs ($strupdatesevery)");
 
 $output = $PAGE->get_renderer('report_loglive');
 echo $output->header();
+
+// Print selector dropdown.
+$pluginname = get_string('pluginname', 'report_loglive');
+print_report_selector($pluginname);
 echo $output->reader_selector($renderable);
 echo $output->toggle_liveupdate_button($renderable);
 echo $output->render($renderable);
