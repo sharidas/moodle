@@ -411,6 +411,18 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
         docElement.on(GradingEvents.EXPAND_GRADE_PANEL, function() {
             this.expandPanel();
         }.bind(this));
+
+        var savebutton = $('[data-region="grade-actions"]').find('button[name="savechanges"]');
+
+        // The ideal way is to trigger this just before the session time out, so that we don't have to save
+        // it every time.
+        var savetime = (M.cfg.sessiontimeout - 60) * 1000;
+
+        if (savebutton.length) {
+            setInterval(function () {
+                savebutton.click();
+            }, savetime);
+        }
     };
 
     return GradingPanel;
